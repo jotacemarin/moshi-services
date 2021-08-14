@@ -1,0 +1,46 @@
+custom:
+  secrets: ${file(./config/${self:provider.stage}.json)}
+
+service: ${self:custom.secrets.service.name}
+
+frameworkVersion: '2'
+
+provider:
+  name: ${self:custom.secrets.provider.name}
+  runtime: ${self:custom.secrets.provider.runtime}
+  lambdaHashingVersion: 20201221
+  stage: ${opt:stage, 'dev'}
+  profile: mosshi-master
+  region: ${self:custom.secrets.provider.region}
+  environment:
+    MERCADOLIBRE_URL: ${self:custom.secrets.provider.environment.MERCADOLIBRE_URL}
+    MERCADOLIBRE_CLIENT_ID: ${self:custom.secrets.provider.environment.MERCADOLIBRE_CLIENT_ID}
+    MERCADOLIBRE_CLIENT_SECRET: ${self:custom.secrets.provider.environment.MERCADOLIBRE_CLIENT_SECRET}
+    MERCADOLIBRE_REDIRECT: ${self:custom.secrets.provider.environment.MERCADOLIBRE_REDIRECT}
+    REDIS_HOST: ${self:custom.secrets.provider.environment.REDIS_HOST}
+    REDIS_PORT: ${self:custom.secrets.provider.environment.REDIS_PORT}
+    REDIS_PASSWORD: ${self:custom.secrets.provider.environment.REDIS_PASSWORD}
+    REDIS_PREFIX: ${self:custom.secrets.provider.environment.REDIS_PREFIX}
+    REDIS_EXPIRE: ${self:custom.secrets.provider.environment.REDIS_EXPIRE}
+
+functions: ${self:custom.secrets.functions}
+
+resources: 
+  Resources: 
+    CognitoUsersPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${self:custom.secrets.provider.stage}-mosshi-user-pool
+        UsernameAttributes:
+          - email
+        AutoVerifiedAttributes:
+          - email
+    CognitoUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: ${self:custom.secrets.provider.stage}-mosshi-user-pool-client
+        UserPoolId:
+          Ref: CognitoUsersPool
+        ExplicitAuthFlows:
+          - ADMIN_NO_SRP_AUTH
+        GenerateSecret: false

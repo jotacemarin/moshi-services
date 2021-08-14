@@ -1,0 +1,55 @@
+{
+  "service": {
+    "name": "moshi-auth"
+  },
+  "provider": {
+    "name": "aws",
+    "runtime": "nodejs14.x",
+    "stage": "dev",
+    "region": "us-east-2",
+    "environment": {
+      "MERCADOLIBRE_URL": "https://api.mercadolibre.com",
+      "MERCADOLIBRE_CLIENT_ID": "3829398779106166",
+      "MERCADOLIBRE_CLIENT_SECRET": "MHT8OCQB3VsjQ9k6H0fvJ0IXSbQ3klvi",
+      "MERCADOLIBRE_REDIRECT": "https://lgrdvdbepf.execute-api.us-east-2.amazonaws.com/dev/mercadolibre/save/code",
+      "REDIS_HOST": "redis-16824.c62.us-east-1-4.ec2.cloud.redislabs.com",
+      "REDIS_PORT": 16824,
+      "REDIS_PASSWORD": "P7wvh8dVfAGy2c6a169gYUuNnt1uMoSK",
+      "REDIS_PREFIX": "DEV_AUTH",
+      "REDIS_EXPIRE": 21600
+    }
+  },
+  "functions": [
+    {
+      "refresh": {
+        "name": "mercadolibre-refresh",
+        "handler": "handler.refresh",
+        "memorySize": 128,
+        "timeout": 60,
+        "reservedConcurrency": 20,
+        "events": [
+          {
+            "schedule": "cron(0 */5 * * ? *)"
+          }
+        ]
+      }
+    },
+    {
+      "saveCode": {
+        "name": "mercadolibre-save-code",
+        "handler": "handler.saveCode",
+        "memorySize": 128,
+        "timeout": 60,
+        "reservedConcurrency": 20,
+        "events": [
+          {
+            "http": {
+              "path": "/mercadolibre/save/code",
+              "method": "GET"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
